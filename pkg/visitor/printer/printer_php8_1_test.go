@@ -125,3 +125,11 @@ echo Enum::class, Enum::FOO;
 enum Suit: string { case H = 'h'; }
 `)
 }
+
+func TestEnumAsClassNamePHP81(t *testing.T) {
+	tester.NewParserPrintTestSuite(t).UsePHP8().Run(`<?php
+class Enum {}
+Enum::class;
+$x instanceof Enum;
+`)
+}

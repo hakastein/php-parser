@@ -625,3 +625,56 @@ func TestEnumLoneCR(t *testing.T) {
 
 	suite.Run()
 }
+
+func TestEnumAsClassName(t *testing.T) {
+	suite := tester.NewParserDumpTestSuite(t)
+	suite.UsePHP8()
+	suite.Code = `<?php
+class Enum {}
+Enum::class;
+$x instanceof Enum;
+`
+
+	suite.Expected = `&ast.Root{
+	Stmts: []ast.Vertex{
+		&ast.StmtClass{
+			Name: &ast.Identifier{
+				Val: []byte("Enum"),
+			},
+			Stmts: []ast.Vertex{},
+		},
+		&ast.StmtExpression{
+			Expr: &ast.ExprClassConstFetch{
+				Class: &ast.Name{
+					Parts: []ast.Vertex{
+						&ast.NamePart{
+							Val: []byte("Enum"),
+						},
+					},
+				},
+				Const: &ast.Identifier{
+					Val: []byte("class"),
+				},
+			},
+		},
+		&ast.StmtExpression{
+			Expr: &ast.ExprInstanceOf{
+				Expr: &ast.ExprVariable{
+					Name: &ast.Identifier{
+						Val: []byte("$x"),
+					},
+				},
+				Class: &ast.Name{
+					Parts: []ast.Vertex{
+						&ast.NamePart{
+							Val: []byte("Enum"),
+						},
+					},
+				},
+			},
+		},
+	},
+},`
+
+	suite.Run()
+}
