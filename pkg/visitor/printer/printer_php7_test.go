@@ -1582,3 +1582,22 @@ func TestParseAndPrintComplexString4(t *testing.T) {
 		t.Errorf("\nexpected: %s\ngot: %s\n", src, actual)
 	}
 }
+
+func TestParseAndPrintBinaryStrings(t *testing.T) {
+	src := `<?php
+echo b'str', B'str', b"str", B"str";
+echo b"foo $a", B"{$a}";
+echo b<<<EOT
+foo $a
+EOT;
+echo b<<<'EOT'
+foo $a
+EOT;
+`
+
+	actual := print(parse(src))
+
+	if src != actual {
+		t.Errorf("\nexpected: %s\ngot: %s\n", src, actual)
+	}
+}

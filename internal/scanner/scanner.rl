@@ -72,7 +72,7 @@ func (lex *Lexer) Lex() *token.Token {
 
         constant_string =
             start: (
-                "'"         -> qoute
+                "b"i? "'"   -> qoute
                 | "b"i? '"' -> double_qoute
             ),
 
@@ -367,7 +367,7 @@ func (lex *Lexer) Lex() *token.Token {
                 fbreak;
             };
             "`" => {lex.setTokenPosition(tkn); tok = token.ID(int('`')); fnext backqote; fbreak;};
-            '"' => {lex.setTokenPosition(tkn); tok = token.ID(int('"')); fnext template_string; fbreak;};
+            "b"i? '"' => {lex.setTokenPosition(tkn); tok = token.ID(int('"')); fnext template_string; fbreak;};
 
             any_line => {
                 c := lex.data[lex.p]

@@ -7,6 +7,7 @@ import (
 
 	"github.com/VKCOM/php-parser/internal/php7"
 	"github.com/VKCOM/php-parser/internal/scanner"
+	"github.com/VKCOM/php-parser/internal/tester"
 	"github.com/VKCOM/php-parser/pkg/ast"
 	"github.com/VKCOM/php-parser/pkg/conf"
 	"github.com/VKCOM/php-parser/pkg/errors"
@@ -57010,4 +57011,99 @@ func TestControlCharsErrors(t *testing.T) {
 	php7parser := php7.NewParser(lexer, config)
 	php7parser.Parse()
 	assert.DeepEqual(t, expected, parserErrors)
+}
+
+func TestBinaryStrings(t *testing.T) {
+	suite := tester.NewParserDumpTestSuite(t)
+	suite.Version = version.Version{Major: 7, Minor: 4}
+	suite.Code = `<?php
+echo b'str', B'str', b"str", B"str";
+echo b"foo $a", B"{$a}";
+echo b<<<EOT
+foo $a
+EOT;
+echo b<<<'EOT'
+foo $a
+EOT;
+`
+
+	suite.Expected = `&ast.Root{
+	Stmts: []ast.Vertex{
+		&ast.StmtEcho{
+			Exprs: []ast.Vertex{
+				&ast.ScalarString{
+					Val: []byte("b'str'"),
+				},
+				&ast.ScalarString{
+					Val: []byte("B'str'"),
+				},
+				&ast.ScalarString{
+					Val: []byte("b\"str\""),
+				},
+				&ast.ScalarString{
+					Val: []byte("B\"str\""),
+				},
+			},
+		},
+		&ast.StmtEcho{
+			Exprs: []ast.Vertex{
+				&ast.ScalarEncapsed{
+					Parts: []ast.Vertex{
+						&ast.ScalarEncapsedStringPart{
+							Val: []byte("foo "),
+						},
+						&ast.ExprVariable{
+							Name: &ast.Identifier{
+								Val: []byte("$a"),
+							},
+						},
+					},
+				},
+				&ast.ScalarEncapsed{
+					Parts: []ast.Vertex{
+						&ast.ScalarEncapsedStringBrackets{
+							Var: &ast.ExprVariable{
+								Name: &ast.Identifier{
+									Val: []byte("$a"),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		&ast.StmtEcho{
+			Exprs: []ast.Vertex{
+				&ast.ScalarHeredoc{
+					Parts: []ast.Vertex{
+						&ast.ScalarEncapsedStringPart{
+							Val: []byte("foo "),
+						},
+						&ast.ExprVariable{
+							Name: &ast.Identifier{
+								Val: []byte("$a"),
+							},
+						},
+						&ast.ScalarEncapsedStringPart{
+							Val: []byte("\n"),
+						},
+					},
+				},
+			},
+		},
+		&ast.StmtEcho{
+			Exprs: []ast.Vertex{
+				&ast.ScalarHeredoc{
+					Parts: []ast.Vertex{
+						&ast.ScalarEncapsedStringPart{
+							Val: []byte("foo $a\n"),
+						},
+					},
+				},
+			},
+		},
+	},
+},`
+
+	suite.Run()
 }

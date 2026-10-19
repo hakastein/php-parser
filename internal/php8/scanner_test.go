@@ -1895,3 +1895,80 @@ func TestTripleDollar(t *testing.T) {
 	actual = string(tkn.Value)
 	assert.DeepEqual(t, expected, actual)
 }
+
+func TestBinaryStringTokens(t *testing.T) {
+	src := `<?php
+		b'str'
+		B'str'
+		b"str"
+		B"str"
+
+		b"foo $a"
+		B"{$a}"
+
+		b<<<EOT
+foo $a
+EOT;
+		b<<<'EOT'
+foo $a
+EOT;
+		B<<<"EOT"
+foo
+EOT;
+	`
+
+	expected := []string{
+		token.T_CONSTANT_ENCAPSED_STRING.String(),
+		token.T_CONSTANT_ENCAPSED_STRING.String(),
+		token.T_CONSTANT_ENCAPSED_STRING.String(),
+		token.T_CONSTANT_ENCAPSED_STRING.String(),
+
+		token.ID(int('"')).String(),
+		token.T_ENCAPSED_AND_WHITESPACE.String(),
+		token.T_VARIABLE.String(),
+		token.ID(int('"')).String(),
+
+		token.ID(int('"')).String(),
+		token.T_CURLY_OPEN.String(),
+		token.T_VARIABLE.String(),
+		token.ID(int('}')).String(),
+		token.ID(int('"')).String(),
+
+		token.T_START_HEREDOC.String(),
+		token.T_ENCAPSED_AND_WHITESPACE.String(),
+		token.T_VARIABLE.String(),
+		token.T_ENCAPSED_AND_WHITESPACE.String(),
+		token.T_END_HEREDOC.String(),
+		token.ID(int(';')).String(),
+
+		token.T_START_HEREDOC.String(),
+		token.T_ENCAPSED_AND_WHITESPACE.String(),
+		token.T_END_HEREDOC.String(),
+		token.ID(int(';')).String(),
+
+		token.T_START_HEREDOC.String(),
+		token.T_ENCAPSED_AND_WHITESPACE.String(),
+		token.T_END_HEREDOC.String(),
+		token.ID(int(';')).String(),
+	}
+
+	config := conf.Config{
+		Version: &version.Version{
+			Major: 8,
+			Minor: 0,
+		},
+	}
+	lexer := NewLexer([]byte(src), config)
+	actual := []string{}
+
+	for {
+		tkn := lexer.Lex()
+		if tkn.ID == 0 {
+			break
+		}
+
+		actual = append(actual, tkn.ID.String())
+	}
+
+	assert.DeepEqual(t, expected, actual)
+}

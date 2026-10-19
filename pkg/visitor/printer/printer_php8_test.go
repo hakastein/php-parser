@@ -2649,3 +2649,16 @@ __FUNCTION__->length;
 __FUNCTION__->length();
 `)
 }
+
+func TestParseAndPrintBinaryStringsPHP8(t *testing.T) {
+	tester.NewParserPrintTestSuite(t).UsePHP8().Run(`<?php
+echo b'str', B'str', b"str", B"str";
+echo b"foo $a", B"{$a}";
+echo b<<<EOT
+foo $a
+EOT;
+echo b<<<'EOT'
+foo $a
+EOT;
+`)
+}

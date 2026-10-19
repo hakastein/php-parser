@@ -4910,3 +4910,98 @@ A::B::c();
 
 	suite.Run()
 }
+
+func TestBinaryStrings(t *testing.T) {
+	suite := tester.NewParserDumpTestSuite(t)
+	suite.UsePHP8()
+	suite.Code = `<?php
+echo b'str', B'str', b"str", B"str";
+echo b"foo $a", B"{$a}";
+echo b<<<EOT
+foo $a
+EOT;
+echo b<<<'EOT'
+foo $a
+EOT;
+`
+
+	suite.Expected = `&ast.Root{
+	Stmts: []ast.Vertex{
+		&ast.StmtEcho{
+			Exprs: []ast.Vertex{
+				&ast.ScalarString{
+					Val: []byte("b'str'"),
+				},
+				&ast.ScalarString{
+					Val: []byte("B'str'"),
+				},
+				&ast.ScalarString{
+					Val: []byte("b\"str\""),
+				},
+				&ast.ScalarString{
+					Val: []byte("B\"str\""),
+				},
+			},
+		},
+		&ast.StmtEcho{
+			Exprs: []ast.Vertex{
+				&ast.ScalarEncapsed{
+					Parts: []ast.Vertex{
+						&ast.ScalarEncapsedStringPart{
+							Val: []byte("foo "),
+						},
+						&ast.ExprVariable{
+							Name: &ast.Identifier{
+								Val: []byte("$a"),
+							},
+						},
+					},
+				},
+				&ast.ScalarEncapsed{
+					Parts: []ast.Vertex{
+						&ast.ScalarEncapsedStringBrackets{
+							Var: &ast.ExprVariable{
+								Name: &ast.Identifier{
+									Val: []byte("$a"),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		&ast.StmtEcho{
+			Exprs: []ast.Vertex{
+				&ast.ScalarHeredoc{
+					Parts: []ast.Vertex{
+						&ast.ScalarEncapsedStringPart{
+							Val: []byte("foo "),
+						},
+						&ast.ExprVariable{
+							Name: &ast.Identifier{
+								Val: []byte("$a"),
+							},
+						},
+						&ast.ScalarEncapsedStringPart{
+							Val: []byte("\n"),
+						},
+					},
+				},
+			},
+		},
+		&ast.StmtEcho{
+			Exprs: []ast.Vertex{
+				&ast.ScalarHeredoc{
+					Parts: []ast.Vertex{
+						&ast.ScalarEncapsedStringPart{
+							Val: []byte("foo $a\n"),
+						},
+					},
+				},
+			},
+		},
+	},
+},`
+
+	suite.Run()
+}
