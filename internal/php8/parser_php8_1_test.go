@@ -605,3 +605,23 @@ enum Suit: string { case H = 'h'; }
 
 	suite.Run()
 }
+
+func TestEnumLoneCR(t *testing.T) {
+	suite := tester.NewParserDumpTestSuite(t)
+	suite.UsePHP8()
+	// Go drops "\r" from raw string literals.
+	suite.Code = "<?php\nenum\rA {}\n"
+
+	suite.Expected = `&ast.Root{
+	Stmts: []ast.Vertex{
+		&ast.StmtEnum{
+			Name: &ast.Identifier{
+				Val: []byte("A"),
+			},
+			Stmts: []ast.Vertex{},
+		},
+	},
+},`
+
+	suite.Run()
+}

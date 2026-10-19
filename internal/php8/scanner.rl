@@ -69,8 +69,9 @@ func (lex *Lexer) Lex() *token.Token {
         heredoc_label = varname >heredoc_lbl_start %heredoc_lbl_end;
         operators     = ';'|':'|','|'.'|'['|']'|'('|')'|'|'|'/'|'^'|'+'|'-'|'*'|'='|'%'|'!'|'~'|'$'|'<'|'>'|'?'|'@';
 
-        comment                = ('/*' any_line* :>> '*/') | ('//' (any - [\r\n])* newline) | ('#' ((any - [\[\r\n]) (any - [\r\n])*)? newline);
-        whitespace_or_comments = (whitespace_line | comment)+;
+        # As in php-src, a lone '\r' is whitespace and ends a line comment here.
+        comment                = ('/*' any_line* :>> '*/') | ('//' (any - [\r\n])* [\r\n]) | ('#' ((any - [\[\r\n]) (any - [\r\n])*)? [\r\n]);
+        whitespace_or_comments = (whitespace_line | '\r' | comment)+;
 
         prepush { lex.growCallStack(); }
 

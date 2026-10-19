@@ -678,3 +678,63 @@ F {}
 	}
 	suite.Run()
 }
+
+func TestEnumKeywordLoneCRTokens(t *testing.T) {
+	suite := tester.NewLexerTokenStructTestSuite(t)
+	suite.UsePHP8()
+	// A lone "\r" separates `enum` from the name and ends a line comment,
+	// as in php-src. An interpreted string is used because Go drops "\r"
+	// from raw string literals.
+	suite.Code = "<?php\nenum\rA {}\nenum // c\rB {}\nenum # c\rC {}\n"
+	suite.Expected = []*token.Token{
+		{
+			ID:    token.T_ENUM,
+			Value: []byte("enum"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("A"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_ENUM,
+			Value: []byte("enum"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("B"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_ENUM,
+			Value: []byte("enum"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("C"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+	}
+	suite.Run()
+}
