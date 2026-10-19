@@ -114,3 +114,14 @@ class Test {
 function test(A&B $a): A&B {}
 `)
 }
+
+func TestEnumAsNamePHP81(t *testing.T) {
+	tester.NewParserPrintTestSuite(t).UsePHP8().Run(`<?php
+abstract class Enum extends Foo implements Bar {}
+final class Foo extends ENUM {}
+function f(enum $e): Enum { return new Enum; }
+$a instanceof Enum;
+echo Enum::class, Enum::FOO;
+enum Suit: string { case H = 'h'; }
+`)
+}

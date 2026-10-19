@@ -369,3 +369,312 @@ func TestAmpersandNotFollowedByVarOrEllipsisTokens3(t *testing.T) {
 	}
 	suite.Run()
 }
+
+func TestEnumAsNameTokens(t *testing.T) {
+	suite := tester.NewLexerTokenStructTestSuite(t)
+	suite.UsePHP8()
+	suite.Code = `<?php
+class Enum extends Enum implements Enum {}
+abstract class ENUM {}
+final class enum {}
+new Enum;
+Enum::class;
+$a instanceof Enum;
+function f(Enum $e): Enum {}
+use Enum;
+`
+	suite.Expected = []*token.Token{
+		{
+			ID:    token.T_CLASS,
+			Value: []byte("class"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("Enum"),
+		},
+		{
+			ID:    token.T_EXTENDS,
+			Value: []byte("extends"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("Enum"),
+		},
+		{
+			ID:    token.T_IMPLEMENTS,
+			Value: []byte("implements"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("Enum"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_ABSTRACT,
+			Value: []byte("abstract"),
+		},
+		{
+			ID:    token.T_CLASS,
+			Value: []byte("class"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("ENUM"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_FINAL,
+			Value: []byte("final"),
+		},
+		{
+			ID:    token.T_CLASS,
+			Value: []byte("class"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("enum"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_NEW,
+			Value: []byte("new"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("Enum"),
+		},
+		{
+			ID:    ';',
+			Value: []byte(";"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("Enum"),
+		},
+		{
+			ID:    token.T_PAAMAYIM_NEKUDOTAYIM,
+			Value: []byte("::"),
+		},
+		{
+			ID:    token.T_CLASS,
+			Value: []byte("class"),
+		},
+		{
+			ID:    ';',
+			Value: []byte(";"),
+		},
+		{
+			ID:    token.T_VARIABLE,
+			Value: []byte("$a"),
+		},
+		{
+			ID:    token.T_INSTANCEOF,
+			Value: []byte("instanceof"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("Enum"),
+		},
+		{
+			ID:    ';',
+			Value: []byte(";"),
+		},
+		{
+			ID:    token.T_FUNCTION,
+			Value: []byte("function"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("f"),
+		},
+		{
+			ID:    '(',
+			Value: []byte("("),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("Enum"),
+		},
+		{
+			ID:    token.T_VARIABLE,
+			Value: []byte("$e"),
+		},
+		{
+			ID:    ')',
+			Value: []byte(")"),
+		},
+		{
+			ID:    ':',
+			Value: []byte(":"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("Enum"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_USE,
+			Value: []byte("use"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("Enum"),
+		},
+		{
+			ID:    ';',
+			Value: []byte(";"),
+		},
+	}
+	suite.Run()
+}
+
+func TestEnumKeywordTokens(t *testing.T) {
+	suite := tester.NewLexerTokenStructTestSuite(t)
+	suite.UsePHP8()
+	suite.Code = `<?php
+enum A {}
+ENUM B: string {}
+enum
+C {}
+enum/* c */D {}
+enum // c
+E {}
+enum # c
+F {}
+`
+	suite.Expected = []*token.Token{
+		{
+			ID:    token.T_ENUM,
+			Value: []byte("enum"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("A"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_ENUM,
+			Value: []byte("ENUM"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("B"),
+		},
+		{
+			ID:    ':',
+			Value: []byte(":"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("string"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_ENUM,
+			Value: []byte("enum"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("C"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_ENUM,
+			Value: []byte("enum"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("D"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_ENUM,
+			Value: []byte("enum"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("E"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+		{
+			ID:    token.T_ENUM,
+			Value: []byte("enum"),
+		},
+		{
+			ID:    token.T_STRING,
+			Value: []byte("F"),
+		},
+		{
+			ID:    '{',
+			Value: []byte("{"),
+		},
+		{
+			ID:    '}',
+			Value: []byte("}"),
+		},
+	}
+	suite.Run()
+}

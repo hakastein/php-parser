@@ -69,6 +69,9 @@ func (lex *Lexer) Lex() *token.Token {
         heredoc_label = varname >heredoc_lbl_start %heredoc_lbl_end;
         operators     = ';'|':'|','|'.'|'['|']'|'('|')'|'|'|'/'|'^'|'+'|'-'|'*'|'='|'%'|'!'|'~'|'$'|'<'|'>'|'?'|'@';
 
+        comment                = ('/*' any_line* :>> '*/') | ('//' (any - [\r\n])* newline) | ('#' ((any - [\[\r\n]) (any - [\r\n])*)? newline);
+        whitespace_or_comments = (whitespace_line | comment)+;
+
         prepush { lex.growCallStack(); }
 
         constant_string =
@@ -239,7 +242,8 @@ func (lex *Lexer) Lex() *token.Token {
             'endif'i                          => {lex.setTokenPosition(tkn); tok = token.T_ENDIF; fbreak;};
             'endswitch'i                      => {lex.setTokenPosition(tkn); tok = token.T_ENDSWITCH; fbreak;};
             'endwhile'i                       => {lex.setTokenPosition(tkn); tok = token.T_ENDWHILE; fbreak;};
-            'enum'i                           => {lex.setTokenPosition(tkn); tok = token.T_ENUM; fbreak;};
+            'enum'i whitespace_or_comments ('extends'i | 'implements'i) => {lex.ungetCnt(lex.te - lex.ts - 4); lex.setTokenPosition(tkn); tok = token.T_STRING; fbreak;};
+            'enum'i whitespace_or_comments varname_first               => {lex.ungetCnt(lex.te - lex.ts - 4); lex.setTokenPosition(tkn); tok = token.T_ENUM; fbreak;};
             'eval'i                           => {lex.setTokenPosition(tkn); tok = token.T_EVAL; fbreak;};
             'exit'i | 'die'i                  => {lex.setTokenPosition(tkn); tok = token.T_EXIT; fbreak;};
             'extends'i                        => {lex.setTokenPosition(tkn); tok = token.T_EXTENDS; fbreak;};

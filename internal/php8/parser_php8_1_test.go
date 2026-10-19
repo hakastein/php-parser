@@ -433,3 +433,175 @@ function test(A&B $a): A&B {}
 
 	suite.Run()
 }
+
+func TestEnumAsName(t *testing.T) {
+	suite := tester.NewParserDumpTestSuite(t)
+	suite.UsePHP8()
+	suite.Code = `<?php
+abstract class Enum extends Foo implements Bar {}
+final class Foo extends ENUM {}
+function f(enum $e): Enum { return new Enum; }
+$a instanceof Enum;
+echo Enum::class, Enum::FOO;
+enum Suit: string { case H = 'h'; }
+`
+
+	suite.Expected = `&ast.Root{
+	Stmts: []ast.Vertex{
+		&ast.StmtClass{
+			Modifiers: []ast.Vertex{
+				&ast.Identifier{
+					Val: []byte("abstract"),
+				},
+			},
+			Name: &ast.Identifier{
+				Val: []byte("Enum"),
+			},
+			Extends: &ast.Name{
+				Parts: []ast.Vertex{
+					&ast.NamePart{
+						Val: []byte("Foo"),
+					},
+				},
+			},
+			Implements: []ast.Vertex{
+				&ast.Name{
+					Parts: []ast.Vertex{
+						&ast.NamePart{
+							Val: []byte("Bar"),
+						},
+					},
+				},
+			},
+			Stmts: []ast.Vertex{},
+		},
+		&ast.StmtClass{
+			Modifiers: []ast.Vertex{
+				&ast.Identifier{
+					Val: []byte("final"),
+				},
+			},
+			Name: &ast.Identifier{
+				Val: []byte("Foo"),
+			},
+			Extends: &ast.Name{
+				Parts: []ast.Vertex{
+					&ast.NamePart{
+						Val: []byte("ENUM"),
+					},
+				},
+			},
+			Stmts: []ast.Vertex{},
+		},
+		&ast.StmtFunction{
+			Name: &ast.Identifier{
+				Val: []byte("f"),
+			},
+			Params: []ast.Vertex{
+				&ast.Parameter{
+					Type: &ast.Name{
+						Parts: []ast.Vertex{
+							&ast.NamePart{
+								Val: []byte("enum"),
+							},
+						},
+					},
+					Var: &ast.ExprVariable{
+						Name: &ast.Identifier{
+							Val: []byte("$e"),
+						},
+					},
+				},
+			},
+			ReturnType: &ast.Name{
+				Parts: []ast.Vertex{
+					&ast.NamePart{
+						Val: []byte("Enum"),
+					},
+				},
+			},
+			Stmts: []ast.Vertex{
+				&ast.StmtReturn{
+					Expr: &ast.ExprNew{
+						Class: &ast.Name{
+							Parts: []ast.Vertex{
+								&ast.NamePart{
+									Val: []byte("Enum"),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		&ast.StmtExpression{
+			Expr: &ast.ExprInstanceOf{
+				Expr: &ast.ExprVariable{
+					Name: &ast.Identifier{
+						Val: []byte("$a"),
+					},
+				},
+				Class: &ast.Name{
+					Parts: []ast.Vertex{
+						&ast.NamePart{
+							Val: []byte("Enum"),
+						},
+					},
+				},
+			},
+		},
+		&ast.StmtEcho{
+			Exprs: []ast.Vertex{
+				&ast.ExprClassConstFetch{
+					Class: &ast.Name{
+						Parts: []ast.Vertex{
+							&ast.NamePart{
+								Val: []byte("Enum"),
+							},
+						},
+					},
+					Const: &ast.Identifier{
+						Val: []byte("class"),
+					},
+				},
+				&ast.ExprClassConstFetch{
+					Class: &ast.Name{
+						Parts: []ast.Vertex{
+							&ast.NamePart{
+								Val: []byte("Enum"),
+							},
+						},
+					},
+					Const: &ast.Identifier{
+						Val: []byte("FOO"),
+					},
+				},
+			},
+		},
+		&ast.StmtEnum{
+			Name: &ast.Identifier{
+				Val: []byte("Suit"),
+			},
+			Type: &ast.Name{
+				Parts: []ast.Vertex{
+					&ast.NamePart{
+						Val: []byte("string"),
+					},
+				},
+			},
+			Stmts: []ast.Vertex{
+				&ast.EnumCase{
+					Name: &ast.Identifier{
+						Val: []byte("H"),
+					},
+					Expr: &ast.ScalarString{
+						Val: []byte("'h'"),
+					},
+				},
+			},
+		},
+	},
+},`
+
+	suite.Run()
+}
